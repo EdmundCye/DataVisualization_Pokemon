@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="utf-8">
+   <script src="https://d3js.org/d3.v4.min.js"></script>
+   <link rel="stylesheet" type="text/css" href="styles/styles.css">
+   <title>Pokemon Statistics</title>
+</head>
+
+<body>
+
+   <nav class="navbar">
+      <div class="logo_header">
+         <a href="http://localhost/DataVizA2/index.html">
+            <img class="images" src="dataset/pokemon.png" width="200" height="75" alt="Pokemon" />
+         </a>
+      </div>
+
+      <ul class="main_nav">
+         <a href="http://localhost/DataVizA2/index.html" class="nav_links">
+            <li>
+               Treemaps
+            </li>
+         </a>
+         <a href="http://localhost/DataVizA2/scatter-hnw.html" class="nav_links">
+            <li>
+               Bubble Chart (H & W)
+            </li>
+         </a>
+         <a href="http://localhost/DataVizA2/scatter-attr.html" class="nav_links">
+            <li>
+               Bubble Chart (Attribute)
+            </li>
+         </a>
+         <a href="http://localhost/DataVizA2/radar.html" class="nav_links">
+            <li>
+               Radar
+            </li>
+         </a>
+      </ul>
+
+   </nav>
+
+
+   <!-- Page Header -->
+   <h2>Attributes According To Pokemon</h2>
+
+   <!-- Label & Drop Down List -->
+   <span class="dropdown" id="dropdown">
+      <label id="selectPokemon" for="dropdownList">Select a Pokemon:</label>
+   </span>
+
+   <br> <br>
+
+   <!-- Label & Select Button -->
+   <span class="button" id="button">
+      <label id="showGraph" for="displayBtn">Display Statistics:</label>
+      <button id="button">Show Radar Chart</button>
+   </span>
+
+   <!-- Radar Graph -->
+   <div class="radarStat" id="radarStat"></div>
+
+   <!-- JS Script -->
+   <script type="text/javascript">
+
+      // Set up margins page dimensions
+      var margin = { top: 0, right: 0, bottom: 0, left: 0 },
+         width = 1280 - margin.left - margin.right,
+         height = 900 - margin.top - margin.bottom;
+
+      // Set up radar graph dimensions
+      var radarW = 725;
+      var radarH = 725;
+      var svg = d3.select("#radarStat")
+         .append("svg")
+         .attr("width", radarW)
+         .attr("height", radarH)
+         .attr("transform", "translate(0, -80)")
+         .style("display", "block")
+         .style("margin", "auto");
+
+      // Set up variables
+      var attributes = ["HP", "Attack", "Defense", "Sp Atk", "Sp Def", "Speed"]; // Axes
+      var statValues = []; // Store attribute values
+      var selectedOption = "bulbasaur"; // Hold selected value
+      var name = "bulbasaur"; // Name for comparison
+
+      // Set up graph scale
+      var radialScale = d3.scaleLinear()
+         .domain([0, 280])
+         .range([0, 280]);
+      var ticks = [40, 80, 120, 160, 200, 240, 280];
+
+      // Read from CSV file
+      d3.csv("dataset/Pokemon_full.csv", function (error, data) {
+
+         // Display error if error occur
+         if (error) { throw error; };
+
+         // Populate dropdown list
+         var select = d3.select("#dropdown")
+            .append("select")
+            .attr("id", "dropdownList");
+
+         select.selectAll("option")
+            .data(data)
+            .enter()
+            .append("option")
+            .attr("value", function (d) { return d.name; })
+            .text(function (d) { return d.name; });
+
+         // Get selected option and store in a variable
+         d3.select("#dropdownList").on("change", function () {
+            selectedOption = d3.select(this).property("value");
+            statValues.length = 0; // Clear array for every new character
+            console.log(selectedOption); // For checking - 1
+         });
+
+         // Display radar graph when button is pressed
+         d3.select("#button").on("click", function () {
+            // Clear all previous graphs 
+            d3.select("svg").selectAll("*").remove();
+
+            // Render a new graph
+            showRadar();
+         });
+
+         // Function to display radar graph
+         function showRadar() {
+
+            // Function to generate random colour
+            function getRandomColor() {
+               return d3.schemeCategory20[Math.floor(Math.random() * 10)];
+            }
+
+            // Set colour 
+            var color = getRandomColor();
+
+            // Populate array with attribute values
+            data.forEach(function (p) {
+               name = p.name;
+               if (name === selectedOption) {
+                  var stats = {};
+                  stats[attributes[0]] = +p['hp'];
+                  stats[attributes[1]] = +p['attack'];
+                  stats[attributes[2]] = +p['defense'];
+                  stats[attributes[3]] = +p['sp atk'];
+                  stats[attributes[4]] = +p['sp def'];
+                  stats[attributes[5]] = +p['speed'];
+                  statValues.push(stats);
+               }
+            });
+
+            console.log(statValues); // For checking - 2
+
+            // Draw radar graph frame
+            svg.selectAll("circle")
+               .data(ticks)
+               .enter()
+               .append("circle")
+               .attr("cx", radarW / 2)
+               .attr("cy", radarH / 2)
+               .attr("fill", "none")
+               .attr("stroke", "gray")
+               .attr("r", d => radialScale(d))
+
+            // Add labels
+            svg.selectAll(".ticklabel")
+               .data(ticks)
+               .enter()
+               .append("text")
+               .attr("class", "ticklabel")
+               .attr("x", radarW / 2 + 5)
+               .attr("y", d => radarH / 2 - radialScale(d) - 5)
+               .text(d => d.toString())
+               .style("font-family", "arial")
+               .style("font-size", "12px");
+
+            // Calculate x and y coordinates
+            function angleToCoordinate(angle, value) {
+               var x = Math.cos(angle) * radialScale(value);
+               var y = Math.sin(angle) * radialScale(value);
+               return { "x": radarW / 2 + x, "y": radarH / 2 - y };
+            }
+
+            // Declare array - For axis line and label
+            var attrData = attributes.map((f, i) => {
+               var angle = (Math.PI / 2) + (2 * Math.PI * i / attributes.length);
+               return {
+                  "name": f,
+                  "angle": angle,
+                  "line_coord": angleToCoordinate(angle, ticks[ticks.length - 1]), // Line coordinate
+                  "label_coord": angleToCoordinate(angle, ticks[ticks.length - 1] + 35) // Axes coordinate
+               };
+            });
+
+            // Draw inner lines
+            svg.selectAll("line")
+               .data(attrData)
+               .enter()
+               .append("line")
+               .attr("x1", radarW / 2)
+               .attr("y1", radarH / 2)
+               .attr("x2", d => d.line_coord.x)
+               .attr("y2", d => d.line_coord.y)
+               .attr("stroke", "gray");
+
+            // Add axis labels
+            svg.selectAll(".axislabel")
+               .data(attrData)
+               .enter()
+               .append("text")
+               .attr("class", "axislabel")
+               .attr("x", d => d.label_coord.x)
+               .attr("y", d => d.label_coord.y)
+               .attr("transform", function (d, i) { return "translate(0, 10)" })
+               .attr("text-anchor", "middle")
+               .style("font-family", "arial")
+               .style("font-size", "14px")
+               .text(p => p.name);
+
+            // Retrieve x and y coordinates
+            var line = d3.line()
+               .x(d => d.x)
+               .y(d => d.y);
+
+            function getPathCoordinates(data_point) {
+               var coordinates = [];
+               for (var i = 0; i < attributes.length; i++) {
+                  var ft_name = attributes[i];
+                  var angle = (Math.PI / 2) + (2 * Math.PI * i / attributes.length);
+                  coordinates.push(angleToCoordinate(angle, data_point[ft_name]));
+               }
+               return coordinates;
+            }
+
+            // Set up Tooltip
+            var tooltip = d3.select("#radarStat")
+               .append("div")
+               .style("opacity", 0)
+               .attr("class", "tooltip")
+
+            // Tooltip Configurations 
+            var mouseover = function (d) {
+               // Display tooltip
+               tooltip
+                  .style("opacity", 0.8)
+            }
+
+            var mousemove = function (d) {
+               // Reduce opacity of path element
+               d3.select(this).style("opacity", 0.9);
+
+               // Add details to be displayed
+               tooltip
+                  .html("Pokemon: " + selectedOption +
+                     "<br>HP: " + statValues[0].HP +
+                     "<br>Attack: " + statValues[0].Attack +
+                     "<br>Defense: " + statValues[0].Defense +
+                     "<br>Sp Atk: " + statValues[0]["Sp Atk"] +
+                     "<br>Sp Def: " + statValues[0]["Sp Def"] +
+                     "<br>Speed: " + statValues[0].Speed)
+                  .style("left", (d3.mouse(this)[0] + 200) + "px")
+                  .style("top", (d3.mouse(this)[1]) + "px")
+                  .style("opacity", 0.8)
+            }
+
+            var mouseleave = function (d) {
+               // Restore opacity of path element
+               d3.select(this).style("opacity", 1);
+
+               // Hide tooltip
+               tooltip
+                  .transition()
+                  .duration(200)
+                  .style("opacity", 0);
+            }
+
+            // Draw the path element
+            svg.selectAll("path")
+               .data(statValues)
+               .enter()
+               .append("path")
+               .attr("d", d => line(getPathCoordinates(d)))
+               .attr("stroke-width", 1)
+               .attr("stroke", (_, i) => color)
+               .attr("fill", (_, i) => color)
+               .attr("stroke-opacity", 1)
+               .attr("opacity", 1)
+               .on("mouseover", mouseover)
+               .on("mousemove", mousemove)
+               .on("mouseleave", mouseleave);
+
+            //Transition Effects 
+            svg.selectAll("circle,line,text,path")
+               .style("opacity", 0)
+               .transition()
+               .duration(700)
+               .style("opacity", 1);
+         }
+      });
+
+   </script>
+</body>
+
+</html>

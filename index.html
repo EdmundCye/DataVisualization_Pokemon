@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" content="width=device-width, initial-scale=1">
+  <title>Treemaps (Primary Type)</title>
+  <link rel="stylesheet" type="text/css" href="styles/styles.css" />
+
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+</head>
+
+<body>
+
+  <nav class="navbar">
+    <div class="logo_header">
+      <a href="http://localhost/DataVizA2/index.html">
+        <img class="images" src="dataset/pokemon.png" width="200" height="75" alt="Pokemon" />
+      </a>
+    </div>
+
+    <ul class="main_nav">
+      <a href="http://localhost/DataVizA2/index.html" class="nav_links">
+        <li>
+          Treemaps
+        </li>
+      </a>
+      <a href="http://localhost/DataVizA2/scatter-hnw.html" class="nav_links">
+        <li>
+          Bubble Chart (H & W)
+        </li>
+      </a>
+      <a href="http://localhost/DataVizA2/scatter-attr.html" class="nav_links">
+        <li>
+          Bubble Chart (Attribute)
+        </li>
+      </a>
+      <a href="http://localhost/DataVizA2/radar.html" class="nav_links">
+        <li>
+          Radar
+        </li>
+      </a>
+    </ul>
+
+  </nav>
+
+  <h2>Treemaps (Primary Type)</h2>
+
+  <!-- Create a div where the graph will take place -->
+  <div id="my_dataviz"></div>
+
+  <br>
+  <label id="changeType" for="pageList">Changing Type of Pokemon:</label>
+  <span id="pageList">
+    <input type="radio" id="rad" name="page" value="index.html" onchange="changePage()" checked>Primary Type
+    <input type="radio" id="rad" name="page" value="secondary.html" onchange="changePage()">Secondary Type
+  </span><br>
+
+  <script>
+
+    function changePage() {
+      var radios = document.getElementsByName("page");
+      for (var i = 0; i < radios.length; i++) {
+        if (radios[i].checked) {
+          window.location.href = radios[i].value;
+          return;
+        }
+      }
+    }
+
+    // set the dimensions and margins of the graph
+    var margin = { top: 100, right: 350, bottom: 10, left: 350 },
+      width = 1500 - margin.left - margin.right,
+      height = 700 - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#my_dataviz")
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform",
+        "translate(" + margin.left + "," + margin.top + ")");
+
+    // read json data
+    d3.csv("dataset/Pokemon_full.csv", function (error, data) {
+      if (error) {
+        throw error;
+      }
+
+      data.sort(function (a, b) {
+        if (a.type > b.type) {
+          return 1;
+        }
+        if (a.type < b.type) {
+          return -1;
+        }
+      });
+
+      var primary = data.reduce(function (arr, d, i) {
+        if (i === 0 || d.type !== data[i - 1].type) {
+          arr.push(d.type);
+        }
+        return arr;
+      }, []
+      );
+
+      //convert the data in csv into array dict
+      var datadict = primary.map(function (tp, i) {
+        return {
+          name: tp,
+          parent: 'Origin',
+          value: data.filter(da => da.type == tp).length,
+          hp: (d3.sum(data.filter(da => da.type == tp), da => da.hp) / (data.filter(da => da.type == tp).length)).toFixed(2),
+          attack: (d3.sum(data.filter(da => da.type == tp), da => da.attack) / (data.filter(da => da.type == tp).length)).toFixed(2),
+          defense: (d3.sum(data.filter(da => da.type == tp), da => da.defense) / (data.filter(da => da.type == tp).length)).toFixed(2),
+          spatk: (d3.sum(data.filter(da => da.type == tp), da => da["sp atk"]) / (data.filter(da => da.type == tp).length)).toFixed(2),
+          spdef: (d3.sum(data.filter(da => da.type == tp), da => da["sp def"]) / (data.filter(da => da.type == tp).length)).toFixed(2),
+          speed: (d3.sum(data.filter(da => da.type == tp), da => da.speed) / (data.filter(da => da.type == tp).length)).toFixed(2)
+        };
+      });
+
+      datadict.push({ name: 'Origin', parent: '', value: '' });
+      console.log(datadict);
+
+      // stratify the data: reformatting for d3.js
+      var root = d3.stratify()
+        .id(function (d) { return d.name; })  // Name of the entity (column name is name in csv)
+        .parentId(function (d) { return d.parent; })   // Name of the parent (column name is parent in csv)
+        (datadict);
+
+      root.sum(function (d) { return +d.value })   // Compute the numeric value for each entity
+
+      var color = d3.scaleOrdinal()
+        .domain(["bug", "dark", "dragon", "electric", "fairy", "fighting", "fire", "flying", "ghost", "grass", "ground", "ice", "normal", "poison", "psychic", "rock", "steel", "water"])
+        //bright red, pink, bright purple, plum, orange
+        .range(['#69b3a2', '#4F5D75', '#BFC0C0', '#F2D7EE', '#EF8354', '#839788', '#EEE0CB', '#BAA898', '#BFD7EA', '#685044', '#E9AFA3', '#99B2DD', '#F9DEC9', '#3A405A', '#494949', '#FF5D73', '#7C7A7A', '#CF5C36']);
+
+      // Then d3.treemap computes the position of each element of the hierarchy
+      // The coordinates are added to the root object above
+      d3.treemap()
+        .size([width, height])
+        (root)
+
+
+      var tooltip = d3.select("body")
+        .append("div")
+        .attr("class", "tooltip")
+        .attr("id", "tooltipT")
+        .style("opacity", 0);
+
+
+      // use this information to add rectangles:
+      svg
+        .selectAll("rect")
+        .data(root.leaves())
+        .enter()
+        .append("rect")
+        .attr('x', function (d) { return d.x0; })
+        .attr('y', function (d) { return d.y0; })
+        .attr('width', function (d) { return d.x1 - d.x0; })
+        .attr('height', function (d) { return d.y1 - d.y0; })
+        .style("stroke", "black")
+        .attr("fill", function (d) { return color(d.data.name); });
+
+      var rects = svg.selectAll("rect");
+      rects.on("mouseover", function (d) {
+        tooltip.transition()
+          .duration(100)
+          .style("opacity", .9);
+        tooltip.html("Type: " + d.data.name + "<br/>Average HP: " + d.data.hp + "<br/>Average Attack: " + d.data.attack +
+          "<br/>Average Defense: " + d.data.defense + "<br/>Average Sp. Attack: " + d.data.spatk +
+          "<br/>Average Sp. Defense: " + d.data.spdef + "<br/>Average Speed: " + d.data.speed)
+          .style("left", d.x0 + (d.x1 - d.x0) / 2 + 250 + "px")
+          .style("top", d.y0 + (d.y1 - d.y0) / 2 + "px")
+
+      }).on("mouseout", function (d) {
+        // Hide tooltip
+        tooltip.transition()
+          .duration(100)
+          .style("opacity", 0);
+      })
+
+      // and to add the text labels
+      svg.selectAll("text")
+        .data(root.leaves())
+        .enter()
+        .append("text")
+        .attr("x", function (d) { return (d.x0 + d.x1) / 2 })
+        .attr("y", function (d) { return (d.y0 + d.y1) / 2 + 5 })
+        .text(function (d) { return d.data.name + " - " + d.data.value })
+        .attr("text-anchor", "middle")
+        .attr("font-family", "Helvetica")
+        .attr("font-size", "15px")
+        .attr("fill", function (d) {
+          if (d.data.name === "electric" || d.data.name === "fire" || d.data.name === "ghost" || d.data.name === "normal") {
+            return "black";
+          }
+          else {
+            return "white";
+          }
+        });
+    })
+
+  </script>
+</body>

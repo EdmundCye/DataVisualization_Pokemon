@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" content="width=device-width, initial-scale=1">
+    <title>Strength comparison of pokemon over primary type, sized by HP</title>
+    <link rel="stylesheet" type="text/css" href="styles/styles.css" />
+
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="logo_header">
+            <a href="http://localhost/DataVizA2/index.html">
+                <img class="images" src="dataset/pokemon.png" width="200" height="75" alt="Pokemon" />
+            </a>
+        </div>
+
+        <ul class="main_nav">
+            <a href="http://localhost/DataVizA2/index.html" class="nav_links">
+                <li>
+                    Treemaps
+                </li>
+            </a>
+            <a href="http://localhost/DataVizA2/scatter-hnw.html" class="nav_links">
+                <li>
+                    Bubble Chart (H & W)
+                </li>
+            </a>
+            <a href="http://localhost/DataVizA2/scatter-attr.html" class="nav_links">
+                <li>
+                    Bubble Chart (Attribute)
+                </li>
+            </a>
+            <a href="http://localhost/DataVizA2/radar.html" class="nav_links">
+                <li>
+                    Radar
+                </li>
+            </a>
+        </ul>
+    </nav>
+
+    <h2>Strength comparison of pokemon over primary type, sized by HP</h2>
+
+    <br>
+    <label id="labelX" for="selectButtonX">X-axis: </label>
+    <select id="selectButtonX">
+        <option value="attack">Attack</option>
+        <option value="defense">Defense</option>
+        <option value="speed">Speed</option>
+        <option value="sp atk">Special attack</option>
+        <option value="sp def">Special defense</option>
+    </select><br><br>
+
+    <label id="labelY" for="selectButtonY">Y-axis: </label>
+    <select id="selectButtonY">
+        <option value="defense">Defense</option>
+        <option value="attack">Attack</option>
+        <option value="speed">Speed</option>
+        <option value="sp atk">Special attack</option>
+        <option value="sp def">Special defense</option>
+    </select>
+
+    <!--Step 1-->
+    <!--Create SVG and set the scales for the bar chart-->
+    <svg width="1410" height="980"></svg>
+    <script type="text/javascript">
+
+        var svg = d3.select("svg"),
+            margin = 200,
+            width = svg.attr("width") - 250,
+            height = svg.attr("height") - margin;
+
+        var g = svg.append("g")
+            .attr("transform", "translate(" + 100 + "," + 30 + ")");
+
+        var xScale = d3.scaleLinear().range([0, width]);
+        var xScale1 = d3.scaleLinear().range([0, width]);
+        var yScale = d3.scaleLinear().range([height, 100])
+        var rScale = d3.scaleSqrt().range([1, 17]);
+
+        // Step 2: Read the CSV file
+        d3.csv("dataset/Pokemon_full.csv", function (data) {
+
+            // Step 3: Set the scales for the bubble chart
+            xScale.domain([0, 225]);
+            yScale.domain([0, 225]);
+            rScale.domain(d3.extent(data, function (d) { return d.hp; })).nice();
+            var color = d3.scaleOrdinal(d3.schemeCategory20);
+
+            var selectedGroupX = "attack";
+            var allGroupX = ["attack", "defense", "speed", "special attack", "special defense"];
+            var selectedGroupY = "defense";
+            var allGroupY = ["defense", "attack", "speed", "special attack", "special defense"];
+
+            // Define the tooltip
+            var tooltip = d3.select("body")
+                .append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0);
+            var tooltipColor = d3.select("body")
+                .append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0);
+            var tooltipX = d3.select("body")
+                .append("div")
+                .attr("class", "tooltip")
+                .attr("id", "tooltipX")
+                .style("opacity", 0);
+            var tooltipY = d3.select("body")
+                .append("div")
+                .attr("class", "tooltip")
+                .attr("id", "tooltipY")
+                .style("opacity", 0);
+
+            // Step 4: Add the circles
+            g.selectAll(".bubbles")
+                .data(data)
+                .enter()
+                .append("circle")
+                .attr("class", "bubbles")
+                .attr("r", function (d) { return rScale(d.hp); })
+                .style("fill", "blue")
+                .style("fill", function (d) { return color(d.type); })
+                .style("opacity", 0.7)
+                .style("cursor", "pointer");
+
+
+            function updateChart() {
+                selectedGroupX = d3.select("#selectButtonX").property("value");
+                selectedGroupY = d3.select("#selectButtonY").property("value");
+                var circles = g.selectAll(".bubbles");
+
+                circles.transition()
+                    .duration(1000)
+                    .attr("cx", function (d) { return xScale(d[selectedGroupX]); })
+                    .attr("cy", function (d) { return yScale(d[selectedGroupY]); })
+
+                circles.on("mouseover", function (d) {
+                    // Show tooltip and set its position and content
+                    var bubbleColor = d3.select(this).style("fill");
+                    tooltipColor.transition()
+                        .duration(10)
+                        .style("opacity", 1)
+                        .style("background-color", bubbleColor)
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("top", (d3.event.pageY - 28) + "px")
+                        .style("padding-top", "41px")
+                        .style("margin-left", "15px");
+
+                    tooltip.transition()
+                        .duration(100)
+                        .style("opacity", .9);
+                    tooltip.html(d["pokedex id"] + " " + d.name + "<br/>" + "HP: " + d.hp)
+                        .style("left", (d3.event.pageX + 10) + "px")
+                        .style("top", (d3.event.pageY - 28) + "px")
+                        .style("padding-left", "20px")
+                        .style("margin-left", "10px");
+
+                    tooltipX.transition()
+                        .duration(100)
+                        .style("opacity", 0.9);
+                    tooltipX.text(d[selectedGroupX])
+                        .style("left", (d3.event.pageX + 90) + "px")
+                        .style("top", (d3.event.pageY + 87) + "px")
+                        .style("background-color", "#5A5A5A")
+                        .style("color", "white")
+                        .style("font-size", "11px")
+                        .style("padding", "3px");
+
+                    tooltipY.transition()
+                        .duration(100)
+                        .style("opacity", 0.9);
+                    tooltipY.text(d[selectedGroupY])
+                        .style("left", (d3.event.pageX - 55) + "px")
+                        .style("top", (d3.event.pageY - 15) + "px")
+                        .style("background-color", "#5A5A5A")
+                        .style("color", "white")
+                        .style("font-size", "11px")
+                        .style("padding", "3px");
+                })
+                    .on("mouseout", function (d) {
+                        // Reset the fill color of the bubble to its original color
+                        d3.select(this).style("fill", color(d.type));
+
+                        // Hide tooltip
+                        tooltip.transition()
+                            .duration(100)
+                            .style("opacity", 0);
+                        tooltipColor.transition()
+                            .duration(100)
+                            .style("opacity", 0);
+                        tooltipX.transition()
+                            .duration(100)
+                            .style("opacity", 0);
+                        tooltipY.transition()
+                            .duration(100)
+                            .style("opacity", 0);
+                    })
+
+                // Step 5: Add the axes
+                g.select(".x-axis").remove();
+                g.append("g")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(d3.axisBottom(xScale).tickValues([25, 50, 75, 100, 125, 150, 175, 200, 225]))
+                    .append("text")
+                    .attr("y", 40)
+                    .attr("x", 600)
+                    .attr("class", "x-axis")
+                    .attr("letter-spacing", "1")
+                    .attr("text-anchor", "end")
+                    .attr("stroke", "black")
+                    .style("font-size", "14px")
+                    .text(selectedGroupX);
+
+                g.select(".y-axis").remove();
+                g.append("g")
+                    .call(d3.axisLeft(yScale).tickValues([0, 25, 50, 75, 100, 125, 150, 175, 200, 225]))
+                    .append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", 10)
+                    .attr("x", -240)
+                    .attr("class", "y-axis")
+                    .attr("dy", "-5.1em")
+                    .attr("letter-spacing", "1")
+                    .attr("text-anchor", "end")
+                    .attr("stroke", "black")
+                    .style("font-size", "14px")
+                    .text(selectedGroupY);
+            }
+
+            d3.select("#selectButtonX").on("change", function () {
+                updateChart();
+            });
+            d3.select("#selectButtonY").on("change", function () {
+                updateChart();
+            });
+            updateChart();
+
+
+            // Create legend
+            var legend = g.selectAll(".legend")
+                .data(color.domain().sort())
+                .enter().append("g")
+                .attr("class", "legend")
+                .attr("transform", function (d, i) { return "translate(0," + i * 27 + ")"; })
+                .style("cursor", "pointer");
+
+            var selectedColor = null;
+            // Add legend circles
+            legend.append("circle")
+                .attr("r", 9)
+                .attr("cx", width + 50)
+                .attr("cy", 160)
+                .attr("height", 59)
+                .style("fill", color)
+                .style("opacity", 0.7)
+                .on("click", function (type) {
+                    // Toggle visibility of bubbles by type
+                    var bubbles = g.selectAll(".bubbles");
+                    var currentColor = d3.select(this).style("fill");
+
+                    if (selectedColor === currentColor) {
+                        // If currently selected color is clicked again, show all bubbles
+                        selectedColor = null;
+                        this.setAttribute("class", "inactive");
+                        bubbles.style("visibility", "visible").style("opacity", 0.7);
+                        d3.selectAll(".legend circle").style("opacity", 0.7);
+                    } else {
+                        // Show only bubbles with matching color and update selectedColor
+                        selectedColor = currentColor;
+                        this.setAttribute("class", "active");
+                        bubbles.style("visibility", function (d) {
+                            if (d3.select(this).style("fill") === selectedColor) {
+                                return "visible";
+                            } else {
+                                return "hidden";
+                            }
+                        }).style("opacity", function (d) {
+                            if (d3.select(this).style("fill") === selectedColor) {
+                                return 0.7;
+                            } else {
+                                return 0.2;
+                            }
+                        });
+                        d3.selectAll(".legend circle")
+                            .style("opacity", function (d) {
+                                if (d3.select(this).style("fill") === selectedColor) {
+                                    return 0.9;
+                                } else {
+                                    return 0.2;
+                                }
+                            });
+                    }
+                });
+
+            legend.append("text")
+                .attr("x", width + 64)
+                .attr("y", 160)
+                .attr("dy", ".35em")
+                .style("text-anchor", "start")
+                .style("font-size", "17px")
+                .text(function (d) { return d; })
+                .on("click", function (type) {
+                    // Toggle visibility of bubbles by type
+                    var bubbles = g.selectAll(".bubbles");
+
+                    if (this.getAttribute("class") === "inactive") {
+                        this.setAttribute("class", "active");
+                        bubbles.filter(function (d) { return d.type === type; }).style("visibility", "visible");
+                        legend.filter(function (d) { return d.type === type; }).style("opacity", 1);
+                    } else {
+                        this.setAttribute("class", "inactive");
+                        bubbles.filter(function (d) { return d.type === type; }).style("visibility", "hidden");
+                        legend.filter(function (d) { return d.type === type; }).style("opacity", 0.5);
+                    }
+                });
+
+        });
+
+    </script>
+</body>
+
+</html>
