@@ -1,0 +1,410 @@
+body {
+    font-family: "helvetica";
+}
+.box {
+    width: 200px;
+    height: 200px;
+    margin: 40px;
+    float: left;
+    text-align: center;
+    border: #969696 solid thin;
+    padding: 5px;
+}
+
+.red {
+    background-color: #e9967a;
+    color: #f0f8ff;
+}
+
+.blue {
+    background-color: #add8e6;
+    color: #f0f8ff;
+}
+
+.cell {
+    min-width: 40px;
+    min-height: 20px;
+    margin: 5px;
+    float: left;
+    text-align: center;
+    border: #969696 solid thin;
+    padding: 5px;
+}
+
+.fixed-cell {
+    min-width: 40px;
+    min-height: 20px;
+    margin: 5px;
+    position: fixed;
+    text-align: center;
+    border: #969696 solid thin;
+    padding: 5px;
+}
+
+.h-bar {
+    min-height: 15px;
+    min-width: 10px;
+    background-color: steelblue;
+    margin-bottom: 2px;
+    font-size: 11px;
+    color: #f0f8ff;
+    text-align: right;
+    padding-right: 2px;
+}
+
+.v-bar {
+    min-height: 1px;
+    min-width: 30px;
+    background-color: #4682b4;
+    margin-right: 2px;
+    font-size: 10px;
+    color: #f0f8ff;
+    text-align: center;
+    width: 10px;
+    display: inline-block;
+}
+
+.baseline {
+    height: 1px;
+    background-color: black;
+}
+
+.clear {
+    clear: both;
+}
+
+.selected {
+    background-color: #f08080;
+}
+
+.control-group {
+    padding-top: 10px;
+    margin: 10px;
+}
+
+.table {
+    width: 70%;
+}
+
+.table td, th {
+    padding: 5px;
+}
+
+.table-header {
+    background-color: #00AFEF;
+    font-weight: bold;
+}
+
+.table-row-odd {
+    background-color: #f0f8ff;
+}
+
+.table-row-odd {
+    background-color: #d3d3d3;
+}
+
+.code {
+    display: inline-block;
+    font-style: italic;
+    background-color: #d3d3d3;
+    border: #969696 solid thin;
+    padding: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.countdown{
+    width: 150px;
+    height: 150px;
+    font-size: 5em;
+    font-weight: bold;
+}
+
+.axis path, .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font: 10px sans-serif;
+}
+
+.axis .grid-line{
+    stroke: black;
+    shape-rendering: crispEdges;
+    stroke-opacity: .2;
+}
+
+.line{
+    fill: none;    
+    stroke: steelblue;
+    stroke-width: 2;
+}
+
+.dot {
+  fill: #fff;
+  stroke: steelblue;
+}
+
+.area {
+    stroke: none;
+    fill: steelblue;
+    fill-opacity: .2;
+}
+
+.pie text{
+    fill: white;
+    font-weight: bold;
+}
+
+.circle {
+    stroke: none;
+    fill: red;
+    fill-opacity: .7;
+}
+
+.cross {
+    stroke: none;
+    fill: blue;
+    fill-opacity: .7;
+}
+
+.diamond {
+    stroke: none;
+    fill: green;
+    fill-opacity: .7;
+}
+
+.square{
+    stroke: none;
+    fill: yellow;
+    fill-opacity: .7;
+}
+
+.triangle-down{
+    stroke: none;
+    fill: blueviolet;
+    fill-opacity: .7;
+}
+
+.triangle-up{
+    stroke: none;
+    fill: darkred;
+    fill-opacity: .7;
+}
+
+.bubble{
+    fill-opacity: .3;
+}
+
+.bar{
+    stroke: none;
+    fill: steelblue;
+}
+
+.tooltip {
+    position: absolute;
+    text-align: left;
+    padding: 8px;
+    font-size: 14px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    pointer-events: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#tooltipX {
+    position: absolute;
+    top: 0%;
+    left: -400%;
+    transform: translate(-400%, -200%);
+}
+
+#tooltipX::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -7px;
+    border-width: 7px;
+    border-style: solid;
+    border-color: transparent transparent #5A5A5A transparent;
+}
+
+#tooltipY::before {
+    content: "";
+    position: absolute;
+    bottom: 10%;
+    left: 130%;
+    margin-left: -7px;
+    border-width: 7px;
+    border-style: solid;
+    border-color: transparent transparent transparent #5A5A5A;
+}
+
+#selectButtonX {
+    position: absolute;
+    top: 200px;
+    left: 150px;
+}
+
+#labelX {
+    position: absolute;
+    top: 200px;
+    left: 100px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+#selectButtonY {
+    position: absolute;
+    top: 230px;
+    left: 150px;
+}
+
+#labelY {
+    position: absolute;
+    top: 230px;
+    left: 100px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+a{
+    text-decoration: none;
+}
+
+.navbar{
+    display: flex;
+    justify-content: space-between;
+    width: 100vw;
+    background-color: #000000;
+    font-size: 20px;
+}
+.nav_links{
+    text-align: center;
+    padding-top: 27px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+.logo{
+    margin-left: 5%;
+    color: #ffffff;
+    font-size: 25px;
+    font-weight: bold;
+}
+.logo_header{
+    display: flex;
+    margin-left: 2%;
+}
+
+.main_nav{
+    display: flex;
+    width: 50%;
+    float: right;
+    margin-right: 0.5%;
+    list-style: none;
+}
+.main_nav a:hover{
+    background-color: gray;
+}
+
+.main_nav li{
+    display: inline;
+    color: #ffffff;
+}
+.main_nav li a{
+    color: #ffffff;
+}   
+.header-button{
+    padding:0;
+    margin:0;
+    background-color:#000000;
+}
+
+#changeType {
+    position: absolute;
+    top: 210px;
+    left: 30px;
+    font-size: 14px;
+}
+#pageList {
+    position: absolute;
+    top: 240px;
+    left: 25px;
+    font-size: 14px;
+}
+
+#rad {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+h2{
+    padding-top: 50px;
+    text-align: center; 
+    font-weight: bold; 
+    text-decoration: underline; 
+    margin-bottom: -50px;
+}
+
+*{
+    margin: 0;
+    padding: 0;
+}
+
+script {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+span.dropdown {
+    margin: 0 0 0 30px;
+    width: 1280px;
+    height: 50px;
+    white-space: nowrap;
+}
+
+#selectPokemon {
+    font-size: 14px;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+    margin-right: 10px;
+}
+
+span #dropdownList {
+    font-size: 14px;
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 110px 0 0 0;
+}
+
+.button {
+    margin-top: 100px;
+    margin-left: 30px;
+    width: 1280px;
+    height: 50px;
+    white-space: nowrap;
+}
+
+#showGraph {
+    font-size: 14px;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+    margin-right: 10px;
+}
+
+#displayBtn {
+    width:100px;
+    height:25px;
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 10px 0 0 0;
+}
+
+#tooltipT {
+    margin-top: 50px;
+}
