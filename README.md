@@ -5,6 +5,13 @@ Dataset called “Pokemon All Generations”, it contained the information of ev
 The link to download the “pokemon_full.csv” is: https://www.kaggle.com/datasets/igorcoelho24/pokemon-all-generations?select=Pokemon_full.csv 
 To support the information of the pokemon in the CSV file, the source which is the data extracted from API: https://pokeapi.co/ 
 
+## Project Screenshot
+#### Play around by hovering cursor to elements, click on plot and text in filter section to see more interesting filter
+![image](https://github.com/EdmundCye/DataVisualization_Pokemon/assets/111274518/7a699a0e-dc5f-4e7f-b104-22f843a8273c)
+![image](https://github.com/EdmundCye/DataVisualization_Pokemon/assets/111274518/44110cfa-9d87-462b-8488-3ae5203ab9f7)
+![image](https://github.com/EdmundCye/DataVisualization_Pokemon/assets/111274518/6dc0d27e-8efb-497e-bc34-5827e723cf05)
+
+
 ## Local Web Server Setup with XAMPP
 This guide will walk you through setting up a local web server using XAMPP, opening an HTML file in a code editor, and viewing it in a web browser. This is a common setup for web development and testing.
 ### 1. Install and Start XAMPP
